@@ -53,8 +53,8 @@ Maid.rules do
     end
 
     # Tag music genres
-    %w(classical electronic hiphop jazz rb rock).each do |genre_dir|
-      @s.tag_dirname 'src/music/' + genre_dir
+    %w(orch electronic hiphop jazz rb rock).each do |genre_dir|
+      @s.tag_dirname @s.dir_music + genre_dir
     end
   end
 end
