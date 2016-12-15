@@ -57,4 +57,22 @@ Maid.rules do
       @s.tag_dirname @s.dir_music + genre_dir
     end
   end
+
+  rule 'Sampler: move files to directories based on prefix' do
+    dir_done = @s.dir_in + '/00001 done'
+    prefixes = {
+      'jazz'  => @s.dir_music + '/jazz',
+      'orch'  => @s.dir_music + '/orch',
+      'rnb'   => @s.dir_music + '/rnb',
+      'movie' => @s.dir_src + '/movies',
+      'tv'    => @s.dir_src + '/tv'
+    }
+    dir(dir_done + '/*.wav').each do |file|
+      prefixes.each do |pre, dir|
+        dir += '/'
+        filename = File.basename(file)
+        move(file, dir) if filename.start_with? '[' + pre + ']'
+      end
+    end
+  end
 end
