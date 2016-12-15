@@ -32,27 +32,27 @@ class Sampler
 end
 
 Maid.rules do
-  rule 'Sampler: tag based on directory names' do
-    s = Sampler.new
+  @s = Sampler.new
 
+  rule 'Sampler: tag based on directory names' do
     # Add basic `s` tag to every wav
-    dir(s.dir_samples + '/**/*.wav').each do |file|
+    dir(@s.dir_samples + '/**/*.wav').each do |file|
       add_tag(file, 's')
     end
 
     # Tag basic types
-    s.tag_dirname 'field'
-    s.tag_dirname 'session'
+    @s.tag_dirname 'field'
+    @s.tag_dirname 'session'
 
     # Tag source types
-    s.tag_dirname 'src'
+    @s.tag_dirname 'src'
     %w(intv movies tv xxx radio radio/shortwave).each do |type_dir|
-      s.tag_dirname 'src/' + type_dir
+      @s.tag_dirname 'src/' + type_dir
     end
 
     # Tag music genres
     %w(classical electronic hiphop jazz rb rock).each do |genre_dir|
-      s.tag_dirname 'src/music/' + genre_dir
+      @s.tag_dirname 'src/music/' + genre_dir
     end
   end
 end
