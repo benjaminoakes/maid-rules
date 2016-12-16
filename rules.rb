@@ -31,6 +31,17 @@ class Sampler
       @maid.add_tag(file, dir_tag)
     end
   end
+
+  # Copy a filename to the file's macOS Spotlight comment
+  def filename_to_comment(path)
+    filename = File.basename(path)
+    # rubocop:disable Metrics/LineLength
+    command = "osascript -e 'on run {f, c}' -e 'tell app \"Finder\" to set comment of (POSIX file f as alias) to c' -e end "
+    # rubocop:enable Metrics/LineLength
+    command += "\"#{path}\" \"#{filename}\""
+    @maid.logger.info("copy filename to spotlight comments for #{path}")
+    @maid.cmd(command) unless @maid.file_options[:noop]
+  end
 end
 
 Maid.rules do
@@ -73,6 +84,12 @@ Maid.rules do
         filename = File.basename(file)
         move(file, dir) if filename.start_with? '[' + pre + ']'
       end
+    end
+  end
+
+  rule 'Sampler: copy inbox filenames to Spotlight comments' do
+    dir(@s.dir_in + '/*.wav').each do |file|
+      @s.filename_to_comment(file)
     end
   end
 end
