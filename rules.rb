@@ -2,8 +2,8 @@
 
 # Sampler class
 class Sampler
-  def initialize
-    @maid = Maid::Maid.new
+  def initialize(maid)
+    @maid = maid
 
     @dir_root = '/Users/montchr/Music/0-sounds-0'
     @dir_in = @dir_root + '/00000 in'
@@ -34,7 +34,7 @@ class Sampler
 end
 
 Maid.rules do
-  @s = Sampler.new
+  @s = Sampler.new(self)
 
   rule 'Sampler: tag based on directory names' do
     # Add basic `s` tag to every wav
