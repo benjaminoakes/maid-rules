@@ -47,49 +47,55 @@ end
 Maid.rules do
   @s = Sampler.new(self)
 
-  rule 'Sampler: tag based on directory names' do
-    # Add basic `s` tag to every wav
-    dir(@s.dir_samples + '/**/*.wav').each do |file|
-      add_tag(file, 's')
+  # Rules for the Inbox directory
+  watch @s.dir_in do
+    rule 'Sampler: move files to directories based on prefix' do
+      dir_done = @s.dir_in + '/00001 done'
+      prefixes = {
+        'jazz'  => @s.dir_music + '/jazz',
+        'orch'  => @s.dir_music + '/orch',
+        'rnb'   => @s.dir_music + '/rnb',
+        'movie' => @s.dir_src + '/movies',
+        'tv'    => @s.dir_src + '/tv'
+      }
+      dir(dir_done + '/*.wav').each do |file|
+        prefixes.each do |pre, dir|
+          dir += '/'
+          filename = File.basename(file)
+          move(file, dir) if filename.start_with? '[' + pre + ']'
+        end
+      end
     end
 
-    # Tag basic types
-    @s.tag_dirname 'field'
-    @s.tag_dirname 'session'
-
-    # Tag source types
-    @s.tag_dirname 'src'
-    %w(intv movies tv xxx radio radio/shortwave).each do |type_dir|
-      @s.tag_dirname 'src/' + type_dir
-    end
-
-    # Tag music genres
-    %w(orch electronic hiphop jazz rb rock).each do |genre_dir|
-      @s.tag_dirname @s.dir_music + genre_dir
-    end
-  end
-
-  rule 'Sampler: move files to directories based on prefix' do
-    dir_done = @s.dir_in + '/00001 done'
-    prefixes = {
-      'jazz'  => @s.dir_music + '/jazz',
-      'orch'  => @s.dir_music + '/orch',
-      'rnb'   => @s.dir_music + '/rnb',
-      'movie' => @s.dir_src + '/movies',
-      'tv'    => @s.dir_src + '/tv'
-    }
-    dir(dir_done + '/*.wav').each do |file|
-      prefixes.each do |pre, dir|
-        dir += '/'
-        filename = File.basename(file)
-        move(file, dir) if filename.start_with? '[' + pre + ']'
+    rule 'Sampler: copy inbox filenames to Spotlight comments' do
+      dir(@s.dir_in + '/*.wav').each do |file|
+        @s.filename_to_comment(file)
       end
     end
   end
 
-  rule 'Sampler: copy inbox filenames to Spotlight comments' do
-    dir(@s.dir_in + '/*.wav').each do |file|
-      @s.filename_to_comment(file)
+  # Rules for the Samples directory
+  watch @s.dir_samples do
+    rule 'Sampler: tag based on directory names' do
+      # Add basic `s` tag to every wav
+      dir(@s.dir_samples + '/**/*.wav').each do |file|
+        add_tag(file, 's')
+      end
+
+      # Tag basic types
+      @s.tag_dirname 'field'
+      @s.tag_dirname 'session'
+
+      # Tag source types
+      @s.tag_dirname 'src'
+      %w(intv movies tv xxx radio radio/shortwave).each do |type_dir|
+        @s.tag_dirname 'src/' + type_dir
+      end
+
+      # Tag music genres
+      %w(orch electronic hiphop jazz rb rock).each do |genre_dir|
+        @s.tag_dirname @s.dir_music + genre_dir
+      end
     end
   end
 end
