@@ -5,6 +5,8 @@ class Sampler
   def initialize(maid)
     @maid = maid
 
+    @exts = %w(wav)
+
     @dir_root = '/Users/montchr/Music/0-sounds-0'
     @dir_in = @dir_root + '/00000 in'
     @dir_samples = @dir_root + '/00001 library/00002 samples'
@@ -13,6 +15,12 @@ class Sampler
   end
 
   attr_reader :dir_root, :dir_in, :dir_samples, :dir_src, :dir_music
+
+  # Does the file have a valid extension?
+  def allowed_ext(filename)
+    ext = File.basename(filename)
+    @exts.include? File.extname(ext).delete('.')
+  end
 
   # Sanitize tags
   def sanitize_tags(tags)
