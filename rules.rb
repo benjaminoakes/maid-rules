@@ -57,8 +57,26 @@ Maid.rules do
 
   # Rules for the Inbox directory
   watch @s.dir_in do
-    rule 'Sampler: move files to directories based on prefix' do
-      dir_done = @s.dir_in + '/00001 done'
+    rule 'Sampler: copy inbox filenames to Spotlight comments' do |mod, add|
+      files = mod + add
+      files.each do |file|
+        next unless @s.allowed_ext(file)
+        @s.filename_to_comment(file)
+      end
+    end
+  end
+
+  # Rules for the Done directory
+  watch @s.dir_in + '/00001 done' do
+    rule 'Sampler: tag each file in Done directory with `s`' do |_mod, add|
+      add.each do |file|
+        next unless @s.allowed_ext(file)
+        add_tag(file, 's')
+      end
+    end
+
+    rule 'Sampler: move files to directories based on prefix' do |mod, add|
+      files = mod + add
       prefixes = {
         'jazz'  => @s.dir_music + '/jazz',
         'orch'  => @s.dir_music + '/orch',
@@ -66,7 +84,8 @@ Maid.rules do
         'movie' => @s.dir_src + '/movies',
         'tv'    => @s.dir_src + '/tv'
       }
-      dir(dir_done + '/*.wav').each do |file|
+      files.each do |file|
+        next unless @s.allowed_ext(file)
         prefixes.each do |pre, dir|
           dir += '/'
           filename = File.basename(file)
