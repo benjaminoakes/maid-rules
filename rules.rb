@@ -26,17 +26,9 @@ class Sampler
   def sanitize_tags(tags)
     tags.map! do |tag|
       tag.delete!('-')
+      tag.tr!('/', '.')
       tag.tr!('+', 'n')
       's.' + tag
-    end
-  end
-
-  # Add tags to files within `dir_path` based on itself
-  def tag_dirname(dir_path)
-    dir_tag = sanitize_tags([dir_path.tr('/', '.')])
-    dir_path = @dir_samples + '/' + dir_path
-    @maid.dir(dir_path + '/**/*.wav').each do |file|
-      @maid.add_tag(file, dir_tag)
     end
   end
 
@@ -93,36 +85,59 @@ Maid.rules do
         end
       end
     end
+  end
 
-    rule 'Sampler: copy inbox filenames to Spotlight comments' do
-      dir(@s.dir_in + '/*.wav').each do |file|
-        @s.filename_to_comment(file)
+  watch @s.dir_samples do
+    rule 'Sampler: tag based on directory names' do |mod, add|
+      files = mod + add
+      @tag_dirs = [
+        'field',
+        'session',
+        'src/intv',
+        'src/movies',
+        'src/music',
+        'src/music/electronic',
+        'src/music/hiphop',
+        'src/music/jazz',
+        'src/music/orch',
+        'src/music/rock',
+        'src/music/rnb',
+        'src/radio',
+        'src/radio/shortwave',
+        'src/tv',
+        'src/xxx'
+      ]
+
+      @tag_dirs.each do |dir|
+        files.each do |chg_file|
+          next unless chg_file.include? dir
+          tag = dir
+
+          case dir
+          when 'src/music/orch'
+            tag = 'orch'
+          end
+
+          add_tag(chg_file, @s.sanitize_tags([tag]))
+        end
       end
+    end
+
+    rule 'Sampler: tag all samples with `s`' do |mod, add|
+      (mod + add).each { |file| add_tag(file, 's') }
     end
   end
 
-  # Rules for the Samples directory
-  watch @s.dir_samples do
-    rule 'Sampler: tag based on directory names' do
-      # Add basic `s` tag to every wav
-      dir(@s.dir_samples + '/**/*.wav').each do |file|
-        add_tag(file, 's')
-      end
+  watch @s.dir_src do
+    rule 'Sampler: tag all samples in `src`' do |mod, add|
+      (mod + add).each { |file| add_tag(file, 's.src') }
+    end
+  end
 
-      # Tag basic types
-      @s.tag_dirname 'field'
-      @s.tag_dirname 'session'
-
-      # Tag source types
-      @s.tag_dirname 'src'
-      %w(intv movies tv xxx radio radio/shortwave).each do |type_dir|
-        @s.tag_dirname 'src/' + type_dir
-      end
-
-      # Tag music genres
-      %w(orch electronic hiphop jazz rb rock).each do |genre_dir|
-        @s.tag_dirname @s.dir_music + genre_dir
-      end
+  rule 'Sampler: Utility: remove tags from all files' do
+    dir(@s.dir_samples + '/**/*').each do |file|
+      tags = tags(file)
+      remove_tag(file, tags)
     end
   end
 end
