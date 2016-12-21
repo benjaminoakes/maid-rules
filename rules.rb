@@ -71,9 +71,8 @@ Maid.rules do
       files.each do |file|
         next unless @s.allowed_ext(file)
         # Don't copy the filename to the comment if it has any uppercase letters
-        # rubocop:disable Style/CaseEquality
-        next unless file === file.downcase
-        # rubocop:enable Style/CaseEquality
+        filename = File.basename(file)
+        next unless filename == filename.downcase
         @s.filename_to_comment(file)
       end
     end
