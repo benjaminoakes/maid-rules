@@ -32,6 +32,18 @@ class Sampler
     end
   end
 
+  # Set up vars for directory tagging
+  def setup_dir_tagging(tag_dir)
+    tag_dir_path = @dir_samples + '/' + tag_dir
+    tag = tag_dir
+    case tag_dir
+    when 'src/music/orch'
+      tag = 'orch'
+    end
+    tag = sanitize_tags([tag])
+    [tag_dir_path, tag]
+  end
+
   # Copy a filename to the file's macOS Spotlight comment
   def filename_to_comment(path)
     filename = File.basename(path)
@@ -101,27 +113,13 @@ Maid.rules do
   end
 
   @tag_dirs.each do |tag_dir|
-    tag_dir_path = @s.dir_samples + '/' + tag_dir
-    tag = tag_dir
-    case tag_dir
-    when 'src/music/orch'
-      tag = 'orch'
-    end
-    tag = @s.sanitize_tags([tag])
+    tag_dir_path, tag = @s.setup_dir_tagging tag_dir
 
     watch tag_dir_path do
       rule "Sampler: tag #{tag} based on directory name" do |mod, add|
         files = mod + add
         files.each do |chg_file|
           add_tag(chg_file, tag)
-        end
-      end
-    end
-
-    repeat '12h' do
-      rule "Sampler: verify #{tag}" do
-        dir(tag_dir_path + '/**/*.wav').each do |file|
-          add_tag(file, tag)
         end
       end
     end
@@ -139,27 +137,31 @@ Maid.rules do
     end
   end
 
-  # Schedule cleanup for untagged files
-  #
-  # Sometimes the watch rules fail to tag everything fully.
-  repeat '12h' do
-    rule 'Sampler: verify `s` tag' do
-      dir(@s.dir_samples + '/**/*.wav').each do |file|
-        add_tag(file, 's')
-      end
+  rule 'Sampler: Utility: verify `s` tag' do
+    dir(@s.dir_samples + '/**/*.wav').each do |file|
+      add_tag(file, 's')
     end
+  end
 
-    rule 'Sampler: verify `s.src` tag' do
-      dir(@s.dir_src + '/**/*.wav').each do |file|
-        add_tag(file, 's.src')
+  rule 'Sampler: Utility: verify `s.src` tag' do
+    dir(@s.dir_src + '/**/*.wav').each do |file|
+      add_tag(file, 's.src')
+    end
+  end
+
+  rule 'Sampler: Utility: verify directory tags' do
+    @tag_dirs.each do |tag_dir|
+      tag_dir_path, tag = @s.setup_dir_tagging tag_dir
+      dir(tag_dir_path + '/**/*.wav').each do |file|
+        add_tag(file, tag)
       end
     end
   end
 
-  rule 'Sampler: Utility: remove tags from all files' do
-    dir(@s.dir_samples + '/**/*').each do |file|
-      tags = tags(file)
-      remove_tag(file, tags)
-    end
-  end
+  # rule 'Sampler: Utility: remove tags from all files' do
+  #   dir(@s.dir_samples + '/**/*').each do |file|
+  #     tags = tags(file)
+  #     remove_tag(file, tags)
+  #   end
+  # end
 end
