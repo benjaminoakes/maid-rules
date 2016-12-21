@@ -77,13 +77,6 @@ Maid.rules do
 
   # Rules for the Done directory
   watch @s.dir_in + '/00001 done' do
-    rule 'Sampler: tag each file in Done directory with `s`' do |_mod, add|
-      add.each do |file|
-        next unless @s.allowed_ext(file)
-        add_tag(file, 's')
-      end
-    end
-
     rule 'Sampler: move files to directories based on prefix' do |mod, add|
       files = mod + add
       prefixes = {
