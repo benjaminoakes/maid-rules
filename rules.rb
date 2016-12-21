@@ -2,6 +2,7 @@
 
 # Sampler class
 class Sampler
+  # rubocop:disable Metrics/MethodLength
   def initialize(maid)
     @maid = maid
 
@@ -12,9 +13,28 @@ class Sampler
     @dir_samples = @dir_root + '/00001 library/00002 samples'
     @dir_src = @dir_samples + '/src'
     @dir_music = @dir_src + '/music'
-  end
 
-  attr_reader :dir_root, :dir_in, :dir_samples, :dir_src, :dir_music
+    @tag_dirs = [
+      'field',
+      'session',
+      'src/intv',
+      'src/movies',
+      'src/music',
+      'src/music/electronic',
+      'src/music/hiphop',
+      'src/music/jazz',
+      # 'src/music/orch',
+      'src/music/rock',
+      'src/music/rnb',
+      'src/radio',
+      'src/radio/shortwave',
+      'src/tv',
+      'src/xxx'
+    ]
+  end
+  # rubocop:enable Metrics/MethodLength
+
+  attr_reader :tag_dirs, :dir_root, :dir_in, :dir_samples, :dir_src, :dir_music
 
   # Does the file have a valid extension?
   def allowed_ext(filename)
@@ -24,24 +44,23 @@ class Sampler
 
   # Sanitize tags
   def sanitize_tags(tags)
-    tags.map! do |tag|
-      tag.delete!('-')
-      tag.tr!('/', '.')
-      tag.tr!('+', 'n')
+    sanitized_tags = tags.map do |tag|
+      tag = tag.delete('-')
+      tag = tag.tr('/', '.')
+      tag = tag.tr('+', 'n')
       's.' + tag
     end
+    sanitized_tags
   end
 
   # Set up vars for directory tagging
-  def setup_dir_tagging(tag_dir)
-    tag_dir_path = @dir_samples + '/' + tag_dir
-    tag = tag_dir
-    case tag_dir
+  def dirname_tag(dir)
+    tag = dir
+    case tag
     when 'src/music/orch'
       tag = 'orch'
     end
-    tag = sanitize_tags([tag])
-    [tag_dir_path, tag]
+    sanitize_tags([tag])
   end
 
   # Copy a filename to the file's macOS Spotlight comment
@@ -58,23 +77,6 @@ end
 
 Maid.rules do
   @s = Sampler.new(self)
-  @tag_dirs = [
-    'field',
-    'session',
-    'src/intv',
-    'src/movies',
-    'src/music',
-    'src/music/electronic',
-    'src/music/hiphop',
-    'src/music/jazz',
-    'src/music/orch',
-    'src/music/rock',
-    'src/music/rnb',
-    'src/radio',
-    'src/radio/shortwave',
-    'src/tv',
-    'src/xxx'
-  ]
 
   # Rules for the Ready directory
   watch @s.dir_in + '/00000 ready' do
@@ -112,14 +114,15 @@ Maid.rules do
     end
   end
 
-  @tag_dirs.each do |tag_dir|
-    tag_dir_path, tag = @s.setup_dir_tagging tag_dir
+  @s.tag_dirs.each do |tag_dir|
+    tag_dir_path = @s.dir_samples + '/' + tag_dir
+    tags = @s.dirname_tag tag_dir
 
     watch tag_dir_path do
-      rule "Sampler: tag #{tag} based on directory name" do |mod, add|
+      rule "Sampler: tag #{tags} based on directory name" do |mod, add|
         files = mod + add
         files.each do |chg_file|
-          add_tag(chg_file, tag)
+          add_tag(chg_file, tags)
         end
       end
     end
@@ -150,10 +153,11 @@ Maid.rules do
   end
 
   rule 'Sampler: Utility: verify directory tags' do
-    @tag_dirs.each do |tag_dir|
-      tag_dir_path, tag = @s.setup_dir_tagging tag_dir
+    @s.tag_dirs.each do |tag_dir|
+      tag_dir_path = @s.dir_samples + '/' + tag_dir
+      tags = @s.dirname_tag(tag_dir)
       dir(tag_dir_path + '/**/*.wav').each do |file|
-        add_tag(file, tag)
+        add_tag(file, tags)
       end
     end
   end
