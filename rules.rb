@@ -64,19 +64,23 @@ Maid.rules do
     'src/xxx'
   ]
 
-  # Rules for the Inbox directory
-  watch @s.dir_in do
+  # Rules for the Ready directory
+  watch @s.dir_in + '/00000 ready' do
     rule 'Sampler: copy inbox filenames to Spotlight comments' do |mod, add|
       files = mod + add
       files.each do |file|
         next unless @s.allowed_ext(file)
+        # Don't copy the filename to the comment if it has any uppercase letters
+        # rubocop:disable Style/CaseEquality
+        next unless file === file.downcase
+        # rubocop:enable Style/CaseEquality
         @s.filename_to_comment(file)
       end
     end
   end
 
-  # Rules for the Done directory
-  watch @s.dir_in + '/00001 done' do
+  # Rules for the Out directory
+  watch @s.dir_in + '/00001 out' do
     rule 'Sampler: move files to directories based on prefix' do |mod, add|
       files = mod + add
       prefixes = {
