@@ -10,6 +10,8 @@ class Sampler
 
     @dir_root = '/Users/montchr/Music/0-sounds-0'
     @dir_in = @dir_root + '/00000 in'
+    @dir_in_rxxd = @dir_in + '/00001 rxxd'
+    @dir_in_out = @dir_in + '/00002 out'
     @dir_samples = @dir_root + '/00001 library/00002 samples'
     @dir_src = @dir_samples + '/src'
     @dir_music = @dir_src + '/music'
@@ -34,7 +36,8 @@ class Sampler
   end
   # rubocop:enable Metrics/MethodLength
 
-  attr_reader :tag_dirs, :dir_root, :dir_in, :dir_samples, :dir_src, :dir_music
+  attr_reader :tag_dirs, :dir_root, :dir_in, :dir_in_rxxd, :dir_in_out,
+              :dir_samples, :dir_src, :dir_music
 
   # Does the file have a valid extension?
   def allowed_ext(filename)
@@ -79,8 +82,8 @@ Maid.rules do
   @s = Sampler.new(self)
 
   # Rules for the Ready directory
-  watch @s.dir_in + '/00000 ready' do
-    rule 'Sampler: copy inbox filenames to Spotlight comments' do |mod, add|
+  watch @s.dir_in_rxxd do
+    rule 'Sampler: copy filenames to Spotlight comments' do |mod, add|
       files = mod + add
       files.each do |file|
         next unless @s.allowed_ext(file)
@@ -93,7 +96,7 @@ Maid.rules do
   end
 
   # Rules for the Out directory
-  watch @s.dir_in + '/00001 out' do
+  watch @s.dir_in_out do
     rule 'Sampler: move files to directories based on prefix' do |mod, add|
       files = mod + add
       prefixes = {
