@@ -88,8 +88,9 @@ Maid.rules do
       files.each do |file|
         next unless @s.allowed_ext(file)
         # Don't copy the filename to the comment if it has any uppercase letters
-        filename = File.basename(file)
-        next unless filename == filename.downcase
+        name = File.basename(file)
+        next unless (name == name.downcase) || (name.start_with? '[yt]')
+        # Copy filename to comment
         @s.filename_to_comment(file)
       end
     end
@@ -104,7 +105,8 @@ Maid.rules do
         'orch'  => @s.dir_music + '/orch',
         'rnb'   => @s.dir_music + '/rnb',
         'movie' => @s.dir_src + '/movies',
-        'tv'    => @s.dir_src + '/tv'
+        'tv'    => @s.dir_src + '/tv',
+        'yt'    => @s.dir_src + '/youtube'
       }
       files.each do |file|
         next unless @s.allowed_ext(file)
