@@ -23,7 +23,7 @@ class Sampler
       'src/music/electronic',
       'src/music/hiphop',
       'src/music/jazz',
-      # 'src/music/orch',
+      'src/music/orch',
       'src/music/rock',
       'src/music/rnb',
       'src/radio',
