@@ -80,6 +80,13 @@ end
 
 Maid.rules do
   @s = Sampler.new(self)
+  @allowed_tag_namespaces = %w(
+    insects
+    strings
+    vinyl
+    vox
+    woodwind
+  )
 
   # Rules for the Ready directory
   watch @s.dir_in_rxxd do
@@ -136,6 +143,18 @@ Maid.rules do
   watch @s.dir_samples do
     rule 'Sampler: tag all samples with `s`' do |mod, add|
       (mod + add).each { |file| add_tag(file, 's') }
+    end
+
+    rule 'Sampler: add base tag to tags in allowed namespaces' do |mod, add|
+      (mod + add).each do |file|
+        tags(file).each do |tag|
+          tag_base = tag.rpartition('.')[0]
+          unpre_tag_base = tag_base.sub('s.', '')
+          next if unpre_tag_base == 's'
+          next unless @allowed_tag_namespaces.include? unpre_tag_base
+          add_tag(file, tag_base)
+        end
+      end
     end
   end
 
