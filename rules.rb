@@ -152,6 +152,7 @@ Maid.rules do
           unpre_tag_base = tag_base.sub('s.', '')
           next if unpre_tag_base == 's'
           next unless @allowed_tag_namespaces.include? unpre_tag_base
+          next if contains_tag?(file, tag_base)
           add_tag(file, tag_base)
         end
       end
