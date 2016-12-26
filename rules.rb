@@ -7,6 +7,7 @@ class Sampler
     @maid = maid
 
     @exts = %w(wav)
+    @tag_prefix = ''
 
     @dir_root = '/Users/montchr/Music/0-sounds-0'
     @dir_in = @dir_root + '/00000 in'
@@ -51,7 +52,7 @@ class Sampler
       tag = tag.delete('-')
       tag = tag.tr('/', '.')
       tag = tag.tr('+', 'n')
-      's.' + tag
+      @tag_prefix + tag
     end
     sanitized_tags
   end
@@ -150,9 +151,8 @@ Maid.rules do
       (mod + add).each do |file|
         tags(file).each do |tag|
           tag_base = tag.rpartition('.')[0]
-          unpre_tag_base = tag_base.sub('s.', '')
-          next if unpre_tag_base == 's'
-          next unless @allowed_tag_namespaces.include? unpre_tag_base
+          next if tag_base == 's'
+          next unless @allowed_tag_namespaces.include? tag_base
           next if contains_tag?(file, tag_base)
           add_tag(file, tag_base)
         end
@@ -162,7 +162,7 @@ Maid.rules do
 
   watch @s.dir_src do
     rule 'Sampler: tag all samples in `src`' do |mod, add|
-      (mod + add).each { |file| add_tag(file, 's.src') }
+      (mod + add).each { |file| add_tag(file, 'src') }
     end
   end
 
@@ -172,9 +172,9 @@ Maid.rules do
     end
   end
 
-  rule 'Sampler: Utility: verify `s.src` tag' do
+  rule 'Sampler: Utility: verify `src` tag' do
     dir(@s.dir_src + '/**/*.wav').each do |file|
-      add_tag(file, 's.src')
+      add_tag(file, 'src')
     end
   end
 
