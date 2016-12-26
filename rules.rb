@@ -82,6 +82,7 @@ Maid.rules do
   @s = Sampler.new(self)
   @allowed_tag_namespaces = %w(
     insects
+    perc
     strings
     vinyl
     vox
