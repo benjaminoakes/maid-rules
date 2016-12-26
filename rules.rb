@@ -86,7 +86,7 @@ Maid.rules do
     strings
     vinyl
     vox
-    woodwind
+    windinst
   )
 
   # Rules for the Ready directory
