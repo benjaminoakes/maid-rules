@@ -87,7 +87,6 @@ Maid.rules do
     strings
     vinyl
     vox
-    windinst
   )
 
   # Rules for the Ready directory
