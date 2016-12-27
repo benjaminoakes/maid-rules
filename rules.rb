@@ -42,8 +42,12 @@ class Sampler
 
   # Does the file have a valid extension?
   def allowed_ext(filename)
-    ext = File.basename(filename)
-    @exts.include? File.extname(ext).delete('.')
+    @exts.include? file_ext(filename)
+  end
+
+  # Get the file extension for a given file, without the dot
+  def file_ext(filename)
+    File.extname(filename).delete('.')
   end
 
   # Sanitize tags
