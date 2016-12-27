@@ -37,8 +37,8 @@ class Sampler
   end
   # rubocop:enable Metrics/MethodLength
 
-  attr_reader :tag_dirs, :dir_root, :dir_in, :dir_in_rxxd, :dir_in_out,
-              :dir_samples, :dir_src, :dir_music
+  attr_reader :tag_dirs, :dir_in, :dir_in_rxxd, :dir_in_out, :dir_samples,
+              :dir_src, :dir_music
 
   # Does the file have a valid extension?
   def allowed_ext(filename)
@@ -80,6 +80,11 @@ class Sampler
     command += "\"#{path}\" \"#{filename}\""
     @maid.logger.info("copy filename to spotlight comments for #{path}")
     @maid.cmd(command) unless @maid.file_options[:noop]
+  end
+
+  # Set a file to hidden in Finder
+  def hide_file(path)
+    @maid.cmd("chflags hidden \"#{path}\"")
   end
 end
 
@@ -145,6 +150,15 @@ Maid.rules do
     end
   end
 
+  watch @s.dir_in do
+    rule 'Hide all Adobe Audition meta files' do |_mod, add|
+      add.each do |file|
+        next unless @s.file_ext(file) == 'pkf'
+        @s.hide_file(file)
+      end
+    end
+  end
+
   watch @s.dir_samples do
     rule 'Sampler: tag all samples with `s`' do |mod, add|
       (mod + add).each { |file| add_tag(file, 's') }
@@ -159,6 +173,13 @@ Maid.rules do
           next if contains_tag?(file, tag_base)
           add_tag(file, tag_base)
         end
+      end
+    end
+
+    rule 'Hide all Adobe Audition meta files' do |_mod, add|
+      add.each do |file|
+        next unless @s.file_ext(file) == 'pkf'
+        @s.hide_file(file)
       end
     end
   end
