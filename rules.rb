@@ -160,10 +160,6 @@ Maid.rules do
   end
 
   watch @s.dir_samples do
-    rule 'Sampler: tag all samples with `s`' do |mod, add|
-      (mod + add).each { |file| add_tag(file, 's') }
-    end
-
     rule 'Sampler: add base tag to tags in allowed namespaces' do |mod, add|
       (mod + add).each do |file|
         tags(file).each do |tag|
