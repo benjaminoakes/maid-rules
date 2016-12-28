@@ -184,34 +184,6 @@ Maid.rules do
     end
   end
 
-  watch @s.dir_src do
-    rule 'Sampler: tag all samples in `src`' do |mod, add|
-      (mod + add).each { |file| add_tag(file, 'src') }
-    end
-  end
-
-  rule 'Sampler: Utility: verify `s` tag' do
-    dir(@s.dir_samples + '/**/*.wav').each do |file|
-      add_tag(file, 's')
-    end
-  end
-
-  rule 'Sampler: Utility: verify `src` tag' do
-    dir(@s.dir_src + '/**/*.wav').each do |file|
-      add_tag(file, 'src')
-    end
-  end
-
-  rule 'Sampler: Utility: verify directory tags' do
-    @s.tag_dirs.each do |tag_dir|
-      tag_dir_path = @s.dir_samples + '/' + tag_dir
-      tags = @s.dirname_tag(tag_dir)
-      dir(tag_dir_path + '/**/*.wav').each do |file|
-        add_tag(file, tags)
-      end
-    end
-  end
-
   # rule 'Sampler: Utility: remove tags from all files' do
   #   dir(@s.dir_samples + '/**/*').each do |file|
   #     tags = tags(file)
