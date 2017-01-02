@@ -32,7 +32,7 @@ class Sampler
       'src/radio',
       'src/radio/shortwave',
       'src/tv',
-      'src/xxx'
+      'src/youtube'
     ]
   end
   # rubocop:enable Metrics/MethodLength
