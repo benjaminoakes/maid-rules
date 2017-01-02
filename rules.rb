@@ -129,8 +129,11 @@ Maid.rules do
         next unless @s.allowed_ext(file)
         prefixes.each do |pre, dir|
           dir += '/'
-          filename = File.basename(file)
-          move(file, dir) if filename.start_with? '[' + pre + ']'
+          pre = '[' + pre + '] '
+          next unless File.basename(file).start_with? pre
+          new_file = file.sub(pre, '')
+          rename(file, new_file)
+          move(new_file, dir)
         end
       end
     end
