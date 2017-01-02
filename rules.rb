@@ -97,6 +97,10 @@ Maid.rules do
     vinyl
     vox
   )
+  @hide_exts = %w(
+    pkf
+    asd
+  )
 
   # Rules for the Ready directory
   watch @s.dir_in_rxxd do
@@ -154,9 +158,9 @@ Maid.rules do
   end
 
   watch @s.dir_in do
-    rule 'Hide all Adobe Audition meta files' do |_mod, add|
+    rule 'Hide files with certain extensions' do |_mod, add|
       add.each do |file|
-        next unless @s.file_ext(file) == 'pkf'
+        next unless @hide_exts.include? @s.file_ext(file)
         @s.hide_file(file)
       end
     end
@@ -175,9 +179,9 @@ Maid.rules do
       end
     end
 
-    rule 'Hide all Adobe Audition meta files' do |_mod, add|
+    rule 'Hide files with certain extensions' do |_mod, add|
       add.each do |file|
-        next unless @s.file_ext(file) == 'pkf'
+        next unless @hide_exts.include? @s.file_ext(file)
         @s.hide_file(file)
       end
     end
