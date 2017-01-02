@@ -16,6 +16,7 @@ class Sampler
     @dir_samples = @dir_root + '/00001 library/00002 samples'
     @dir_src = @dir_samples + '/src'
     @dir_music = @dir_src + '/music'
+    @dir_stg_smp = @dir_root + '/00005 staging/00000 ALL SAMPLES'
 
     @tag_dirs = [
       'field',
@@ -38,7 +39,7 @@ class Sampler
   # rubocop:enable Metrics/MethodLength
 
   attr_reader :tag_dirs, :dir_in, :dir_in_rxxd, :dir_in_out, :dir_samples,
-              :dir_src, :dir_music
+              :dir_src, :dir_music, :dir_stg_smp
 
   # Does the file have a valid extension?
   def allowed_ext(filename)
@@ -85,6 +86,14 @@ class Sampler
   # Set a file to hidden in Finder
   def hide_file(path)
     @maid.cmd("chflags hidden \"#{path}\"")
+  end
+
+  # Create a symbolic link
+  def symlink(src, dest)
+    # Use the `f` flag to create a new link even if one already exists
+    cmd = "ln -sf \"#{src}\" \"#{dest}\""
+    @maid.logger.info("symlink \"#{src}\" to \"#{dest}\"")
+    @maid.cmd(cmd) unless @maid.file_options[:noop]
   end
 end
 
@@ -183,6 +192,23 @@ Maid.rules do
       add.each do |file|
         next unless @hide_exts.include? @s.file_ext(file)
         @s.hide_file(file)
+      end
+    end
+
+    rule 'Create symlinks to files in the ALL directory' do |mod, add, del|
+      all = (mod + add + del)
+      all.each do |file|
+        next unless @s.allowed_ext(file)
+        fn = File.basename(file)
+        dest = @s.dir_stg_smp + '/' + fn
+        if del.include? file
+          # We need to use the `rm` command here because `trash()` will follow
+          # the symlink and attempt to trash the original file
+          logger.info("removing symlink #{dest}")
+          cmd("rm \"#{dest}\"")
+          next
+        end
+        @s.symlink(file, dest)
       end
     end
   end
