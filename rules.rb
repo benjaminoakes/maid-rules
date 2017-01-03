@@ -17,6 +17,7 @@ class Sampler
     @dir_src = @dir_samples + '/src'
     @dir_music = @dir_src + '/music'
     @dir_stg_smp = @dir_root + '/00005 staging/00000 ALL SAMPLES'
+    @dir_dvc_ot = @dir_root + '/00002 devices/octatrack'
 
     @tag_dirs = [
       'field',
@@ -39,7 +40,7 @@ class Sampler
   # rubocop:enable Metrics/MethodLength
 
   attr_reader :tag_dirs, :dir_in, :dir_in_rxxd, :dir_in_out, :dir_samples,
-              :dir_src, :dir_music, :dir_stg_smp
+              :dir_src, :dir_music, :dir_stg_smp, :dir_dvc_ot
 
   # Does the file have a valid extension?
   def allowed_ext(filename)
@@ -209,6 +210,26 @@ Maid.rules do
           next
         end
         @s.symlink(file, dest)
+      end
+    end
+  end
+
+  watch @s.dir_dvc_ot do
+    rule 'Sampler: move OT meta files to sample dir' do |_mod, add|
+      add.each do |file|
+        next unless @s.file_ext(file) == 'ot'
+        next if File.symlink? file
+        fn = File.basename(file)
+        smp_fn = fn.gsub('.ot', '.wav')
+        # Find the corresponding sample file in the samples directory
+        find(@s.dir_samples).grep(/#{smp_fn}$/) do |smp|
+          smp_dir = File.dirname(smp) + '/'
+          # Move the OT metadata file to the sample's directory
+          move(file, smp_dir)
+          # Symlink the OT file from its new home back to the directory where we
+          # found it originally
+          @s.symlink(smp_dir + fn, file)
+        end
       end
     end
   end
