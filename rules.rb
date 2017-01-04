@@ -136,10 +136,12 @@ Maid.rules do
       prefixes = {
         'jazz'  => @s.dir_music + '/jazz',
         'orch'  => @s.dir_music + '/orch',
+        'rock'  => @s.dir_music + '/rock',
         'rnb'   => @s.dir_music + '/rnb',
         'movie' => @s.dir_src + '/movies',
         'tv'    => @s.dir_src + '/tv',
-        'yt'    => @s.dir_src + '/youtube'
+        'yt'    => @s.dir_src + '/youtube',
+        'field' => @s.dir_samples + '/field'
       }
       files.each do |file|
         next unless @s.allowed_ext(file)
