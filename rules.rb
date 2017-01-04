@@ -201,18 +201,19 @@ Maid.rules do
     end
 
     rule 'Create symlinks to files in the ALL directory' do |mod, add, del|
-      all = (mod + add + del)
-      all.each do |file|
+      # Deleted files should be handled first so new symlinks can be created if
+      # the original file is just being moved
+      del.each do |file|
         next unless @s.allowed_ext(file)
-        fn = File.basename(file)
-        dest = @s.dir_stg_smp + '/' + fn
-        if del.include? file
-          # We need to use the `rm` command here because `trash()` will follow
-          # the symlink and attempt to trash the original file
-          logger.info("removing symlink #{dest}")
-          cmd("rm \"#{dest}\"")
-          next
-        end
+        dest = @s.dir_stg_smp + '/' + File.basename(file)
+        # We need to use the `rm` command here because `trash()` will follow
+        # the symlink and attempt to trash the original file
+        logger.info("removing symlink #{dest}")
+        cmd("rm \"#{dest}\"")
+      end
+      (mod + add).each do |file|
+        next unless @s.allowed_ext(file)
+        dest = @s.dir_stg_smp + '/' + File.basename(file)
         @s.symlink(file, dest)
       end
     end
