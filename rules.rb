@@ -3,6 +3,7 @@
 # Sampler class
 class Sampler
   # rubocop:disable Metrics/MethodLength
+  # rubocop:disable Metrics/AbcSize
   def initialize(maid)
     @maid = maid
 
@@ -11,7 +12,7 @@ class Sampler
 
     @dir_root = '/Users/montchr/Music/0-sounds-0'
     @dir_in = @dir_root + '/00000 in'
-    @dir_in_rxxd = @dir_in + '/00001 rxxd'
+    @dir_in_proc = @dir_in + '/00001 processed'
     @dir_in_out = @dir_in + '/00002 out'
     @dir_samples = @dir_root + '/00001 library/00002 samples'
     @dir_src = @dir_samples + '/src'
@@ -38,8 +39,9 @@ class Sampler
     ]
   end
   # rubocop:enable Metrics/MethodLength
+  # rubocop:enable Metrics/AbcSize
 
-  attr_reader :tag_dirs, :dir_in, :dir_in_rxxd, :dir_in_out, :dir_samples,
+  attr_reader :tag_dirs, :dir_in, :dir_in_proc, :dir_in_out, :dir_samples,
               :dir_src, :dir_music, :dir_stg_smp, :dir_dvc_ot
 
   # Does the file have a valid extension?
@@ -113,7 +115,7 @@ Maid.rules do
   )
 
   # Rules for the Ready directory
-  watch @s.dir_in_rxxd do
+  watch @s.dir_in_proc do
     rule 'Sampler: copy filenames to Spotlight comments' do |mod, add|
       files = mod + add
       files.each do |file|
