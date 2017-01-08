@@ -106,31 +106,6 @@ Maid.rules do
     end
   end
 
-  # Rules for the Out directory
-  watch @s.dir_in_out do
-    rule 'Sampler: move files to directories based on prefix' do |mod, add|
-      files = mod + add
-      prefixes = %w(jazz orch rock rnb field)
-      files.each do |file|
-        next unless @s.allowed_ext(file)
-        prefixes.each do |pre|
-          dir = pre
-          pre = '[' + pre + '] '
-          fn = File.basename(file)
-          next unless fn.start_with? pre
-          dir = 'orchestral -- strings' if dir == 'orch'
-          dir = @s.dir_samples + '/-- ' + dir + ' --/'
-          unless File.directory?(dir)
-            fail_msg = "#{dir} does not exist! File #{fn} not moved."
-            logger.info(fail_msg)
-            next
-          end
-          move(new_file, dir)
-        end
-      end
-    end
-  end
-
   # Watch the "In" directory
   watch @s.dir_in do
     rule 'Hide files with certain extensions' do |_mod, add|
