@@ -1,0 +1,112 @@
+/Users/.../Music/0-sounds-0
+├── 00000\ in
+│   ├── 00000\ ready
+│   ├── 00001\ processed
+│   ├── 00002\ out
+│   ├── redo
+│   └── sessions
+├── 00001\ library
+│   ├── 00001\ rec
+│   │   ├── experiments
+│   │   ├── field
+│   │   ├── home
+│   │   ├── line
+│   │   ├── radio
+│   │   │   └── shortwave
+│   │   ├── session
+│   │   ├── src
+│   │   │   ├── games
+│   │   │   ├── intv
+│   │   │   ├── movies
+│   │   │   ├── music
+│   │   │   ├── tv
+│   │   │   └── youtube
+│   │   └── vox
+│   └── 00002\ samples
+│       ├── --\ ambient\ --
+│       ├── --\ atmospheres\ --
+│       ├── --\ bass\ --
+│       ├── --\ drone\ --
+│       ├── --\ drums\ --\ breaks\ --
+│       ├── --\ field\ --
+│       ├── --\ glitch\ --
+│       ├── --\ grains\ --
+│       ├── --\ jazz\ --
+│       ├── --\ noise\ --
+│       ├── --\ orchestral\ --\ strings\ --
+│       ├── --\ percussion\ --
+│       ├── --\ radio\ --
+│       ├── --\ rnb\ --
+│       ├── --\ rock\ --
+│       ├── --\ synth\ --
+│       ├── --\ turntablism\ --
+│       └── --\ vox\ --
+├── 00002\ devices
+│   ├── octatrack
+│   │   ├── 00000\ packs
+│   │   │   └── Disturbance
+│   │   │       ├── AUDIO
+│   │   │       │   └── Disturbance
+│   │   │       │       ├── Ambiences
+│   │   │       │       ├── Drones
+│   │   │       │       ├── Drum\ Hits
+│   │   │       │       ├── Field\ Recordings
+│   │   │       │       ├── Granulation
+│   │   │       │       ├── Subs
+│   │   │       │       └── Tonal\ Textures
+│   │   │       └── DISTURBANCE
+│   │   ├── master
+│   │   │   └── MASTER
+│   │   │       ├── AUDIO
+│   │   │       └── PROJECT\ 161229
+│   │   └── shimpel
+│   │       └── sampels
+│   └── op-1
+│       ├── 00\ in
+│       │   ├── album
+│       │   ├── synth
+│       │   │   └── snapshot
+│       │   └── tape
+│       ├── 01\ out
+│       │   ├── synth
+│       │   └── tape
+│       ├── album
+│       │   ├── 2016-07-14
+│       │   └── 2016-11-17
+│       ├── synth
+│       │   ├── 00\ loaded
+│       │   │   ├── bass
+│       │   │   ├── com
+│       │   │   ├── crystalyn
+│       │   │   ├── detritus
+│       │   │   ├── drones
+│       │   │   ├── grindrz
+│       │   │   ├── groovers
+│       │   │   ├── meandr
+│       │   │   ├── organspads
+│       │   │   ├── space
+│       │   │   ├── user
+│       │   │   ├── vox
+│       │   │   └── wind
+│       │   └── 01\ not\ loaded
+│       │       ├── bass
+│       │       ├── com
+│       │       ├── crystalyn
+│       │       ├── detritus
+│       │       ├── drones
+│       │       ├── grindrz
+│       │       ├── groovers
+│       │       ├── meandr
+│       │       ├── organspads
+│       │       ├── space
+│       │       ├── user
+│       │       ├── vox
+│       │       └── wind
+│       └── tape
+│           ├── 2016-05-08
+│           ├── 2016-07-14
+│           └── 2016-11-25
+└── 00006\ releases
+    ├── Gnit.preset
+    │   └── 2017-01-11\ Selected\ Gesticulations
+    └── soundcloud
