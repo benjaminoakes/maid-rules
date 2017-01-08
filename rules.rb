@@ -2,47 +2,21 @@
 
 # Sampler class
 class Sampler
-  # rubocop:disable Metrics/MethodLength
-  # rubocop:disable Metrics/AbcSize
   def initialize(maid)
     @maid = maid
 
-    @exts = %w(wav)
+    @exts = %w(ot wav)
     @tag_prefix = ''
 
-    @dir_root = '/Users/montchr/Music/0-sounds-0'
+    @dir_root = '/Users/syadasti/Music/0-sounds-0'
     @dir_in = @dir_root + '/00000 in'
     @dir_in_proc = @dir_in + '/00001 processed'
     @dir_in_out = @dir_in + '/00002 out'
     @dir_samples = @dir_root + '/00001 library/00002 samples'
-    @dir_src = @dir_samples + '/src'
-    @dir_music = @dir_src + '/music'
-    @dir_stg_smp = @dir_root + '/00005 staging/00000 ALL SAMPLES'
-    @dir_dvc_ot = @dir_root + '/00002 devices/octatrack'
-
-    @tag_dirs = [
-      'field',
-      'session',
-      'src/intv',
-      'src/movies',
-      'src/music',
-      'src/music/electronic',
-      'src/music/hiphop',
-      'src/music/jazz',
-      'src/music/orch',
-      'src/music/rock',
-      'src/music/rnb',
-      'src/radio',
-      'src/radio/shortwave',
-      'src/tv',
-      'src/youtube'
-    ]
   end
   # rubocop:enable Metrics/MethodLength
-  # rubocop:enable Metrics/AbcSize
 
-  attr_reader :tag_dirs, :dir_in, :dir_in_proc, :dir_in_out, :dir_samples,
-              :dir_src, :dir_music, :dir_stg_smp, :dir_dvc_ot
+  attr_reader :dir_in, :dir_in_proc, :dir_in_out, :dir_samples
 
   # Does the file have a valid extension?
   def allowed_ext(filename)
@@ -52,27 +26,6 @@ class Sampler
   # Get the file extension for a given file, without the dot
   def file_ext(filename)
     File.extname(filename).delete('.')
-  end
-
-  # Sanitize tags
-  def sanitize_tags(tags)
-    sanitized_tags = tags.map do |tag|
-      tag = tag.delete('-')
-      tag = tag.tr('/', '.')
-      tag = tag.tr('+', 'n')
-      @tag_prefix + tag
-    end
-    sanitized_tags
-  end
-
-  # Set up vars for directory tagging
-  def dirname_tag(dir)
-    tag = dir
-    case tag
-    when 'src/music/orch'
-      tag = 'orch'
-    end
-    sanitize_tags([tag])
   end
 
   # Copy a filename to the file's macOS Spotlight comment
@@ -102,9 +55,33 @@ end
 
 Maid.rules do
   @s = Sampler.new(self)
+  @dict = {
+    'Amb'  => 'ambient',
+    'Atm'  => 'atmosphere',
+    'Bk'   => 'break',
+    'Bs'   => 'bass',
+    'Drn'  => 'drone',
+    'Drm'  => 'drums',
+    'Fd'   => 'field',
+    'Gc'   => 'glitch',
+    'Grn'  => 'grain',
+    'Jz'   => 'src.music.jazz',
+    'Nz'   => 'noise',
+    'Oq'   => 'src.music.orch',
+    'Strn' => 'strings',
+    'Pc'   => 'perc',
+    'Rdo'  => 'src.radio',
+    'Rb'   => 'src.music.rnb',
+    'Rk'   => 'src.music.rock',
+    'Syn'  => 'synth',
+    'Ttb'  => 'vinyl.turntablism',
+    'Vx'   => 'vox'
+  }
   @allowed_tag_namespaces = %w(
+    drums
     insects
     perc
+    src
     strings
     vinyl
     vox
@@ -133,44 +110,28 @@ Maid.rules do
   watch @s.dir_in_out do
     rule 'Sampler: move files to directories based on prefix' do |mod, add|
       files = mod + add
-      prefixes = {
-        'jazz'  => @s.dir_music + '/jazz',
-        'orch'  => @s.dir_music + '/orch',
-        'rock'  => @s.dir_music + '/rock',
-        'rnb'   => @s.dir_music + '/rnb',
-        'movie' => @s.dir_src + '/movies',
-        'tv'    => @s.dir_src + '/tv',
-        'yt'    => @s.dir_src + '/youtube',
-        'field' => @s.dir_samples + '/field'
-      }
+      prefixes = %w(jazz orch rock rnb field)
       files.each do |file|
         next unless @s.allowed_ext(file)
-        prefixes.each do |pre, dir|
-          dir += '/'
+        prefixes.each do |pre|
+          dir = pre
           pre = '[' + pre + '] '
-          next unless File.basename(file).start_with? pre
-          new_file = file.sub(pre, '')
-          rename(file, new_file)
+          fn = File.basename(file)
+          next unless fn.start_with? pre
+          dir = 'orchestral -- strings' if dir == 'orch'
+          dir = @s.dir_samples + '/-- ' + dir + ' --/'
+          unless File.directory?(dir)
+            fail_msg = "#{dir} does not exist! File #{fn} not moved."
+            logger.info(fail_msg)
+            next
+          end
           move(new_file, dir)
         end
       end
     end
   end
 
-  @s.tag_dirs.each do |tag_dir|
-    tag_dir_path = @s.dir_samples + '/' + tag_dir
-    tags = @s.dirname_tag tag_dir
-
-    watch tag_dir_path do
-      rule "Sampler: tag #{tags} based on directory name" do |mod, add|
-        files = mod + add
-        files.each do |chg_file|
-          add_tag(chg_file, tags)
-        end
-      end
-    end
-  end
-
+  # Watch the "In" directory
   watch @s.dir_in do
     rule 'Hide files with certain extensions' do |_mod, add|
       add.each do |file|
@@ -180,15 +141,29 @@ Maid.rules do
     end
   end
 
+  # Watch the "Samples" directory
   watch @s.dir_samples do
+    rule 'Sampler: tag based on filename codes' do |mod, add|
+      (mod + add).each do |file|
+        @dict.each do |key, tag|
+          add_tag(file, tag) if File.basename(file).include? key
+        end
+      end
+    end
+
     rule 'Sampler: add base tag to tags in allowed namespaces' do |mod, add|
       (mod + add).each do |file|
         tags(file).each do |tag|
-          tag_base = tag.rpartition('.')[0]
-          next if tag_base == 's'
-          next unless @allowed_tag_namespaces.include? tag_base
-          next if contains_tag?(file, tag_base)
-          add_tag(file, tag_base)
+          tag_parts = tag.split('.')
+          next unless @allowed_tag_namespaces.include? tag_parts[0]
+          next if contains_tag?(file, tag_parts[0])
+          tag_parts.each_index do |i|
+            unless i.zero?
+              i_prev = i - 1
+              tag_parts[i] = tag_parts[i_prev] + '.' + tag_parts[i]
+            end
+            add_tag(file, tag_parts[i])
+          end
         end
       end
     end
@@ -199,50 +174,5 @@ Maid.rules do
         @s.hide_file(file)
       end
     end
-
-    rule 'Create symlinks to files in the ALL directory' do |mod, add, del|
-      # Deleted files should be handled first so new symlinks can be created if
-      # the original file is just being moved
-      del.each do |file|
-        next unless @s.allowed_ext(file)
-        dest = @s.dir_stg_smp + '/' + File.basename(file)
-        # We need to use the `rm` command here because `trash()` will follow
-        # the symlink and attempt to trash the original file
-        logger.info("removing symlink #{dest}")
-        cmd("rm \"#{dest}\"")
-      end
-      (mod + add).each do |file|
-        next unless @s.allowed_ext(file)
-        dest = @s.dir_stg_smp + '/' + File.basename(file)
-        @s.symlink(file, dest)
-      end
-    end
   end
-
-  watch @s.dir_dvc_ot do
-    rule 'Sampler: move OT meta files to sample dir' do |_mod, add|
-      add.each do |file|
-        next unless @s.file_ext(file) == 'ot'
-        next if File.symlink? file
-        fn = File.basename(file)
-        smp_fn = fn.gsub('.ot', '.wav')
-        # Find the corresponding sample file in the samples directory
-        find(@s.dir_samples).grep(/#{smp_fn}$/) do |smp|
-          smp_dir = File.dirname(smp) + '/'
-          # Move the OT metadata file to the sample's directory
-          move(file, smp_dir)
-          # Symlink the OT file from its new home back to the directory where we
-          # found it originally
-          @s.symlink(smp_dir + fn, file)
-        end
-      end
-    end
-  end
-
-  # rule 'Sampler: Utility: remove tags from all files' do
-  #   dir(@s.dir_samples + '/**/*').each do |file|
-  #     tags = tags(file)
-  #     remove_tag(file, tags)
-  #   end
-  # end
 end
