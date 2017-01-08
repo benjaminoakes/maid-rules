@@ -1,0 +1,15 @@
+#!/bin/sh
+#
+# Maid: Launch Agent: Stop
+
+
+if [ "$(uname -s)" == "Darwin" ]; then
+  dir="$HOME/Library/LaunchAgents"
+  username="$(id -un)"
+  file="$dir/$username.maid.plist"
+
+  launchctl unload $file
+  echo "Unloaded Maid launch agent"
+else
+  echo "You aren't running macOS!"
+fi

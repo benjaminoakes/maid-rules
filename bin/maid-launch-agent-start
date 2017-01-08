@@ -1,0 +1,19 @@
+#!/bin/sh
+#
+# Maid: Launch Agent: Start
+
+if [ "$(uname -s)" == "Darwin" ]; then
+  dir="$HOME/Library/LaunchAgents"
+  username="$(id -un)"
+  file="$dir/$username.maid.plist"
+
+  if [ ! -e "$file" ]; then
+    echo "Linking maid plist to LaunchAgents directory..."
+    ln -s $HOME/.maid/macos.maid.plist $file
+  fi
+
+  launchctl load $file
+  echo "Loaded Maid launch agent"
+else
+  echo "You aren't running macOS!"
+fi
