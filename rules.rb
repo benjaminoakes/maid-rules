@@ -113,7 +113,7 @@ Maid.rules do
     asd
   )
 
-  # Rules for the Ready directory
+  # Rules for the "Processed" directory
   watch @s.dir_in_proc do
     rule 'Sampler: copy filenames to Spotlight comments' do |mod, add|
       files = mod + add
